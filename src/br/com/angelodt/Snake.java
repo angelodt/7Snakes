@@ -17,7 +17,7 @@ public class Snake {
 	}
 	
 	public boolean addCell(Cell c) {
-		if(!isFull() && this.body.indexOf(c)==-1) {
+		if(c != null && !isFull() && this.body.indexOf(c)==-1) {
 			this.body.add(c);
 			return true;
 		}

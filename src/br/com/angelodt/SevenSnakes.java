@@ -17,7 +17,7 @@ public class SevenSnakes {
 	 */
 	public static void main(String[] args) {
 		try {
-			Grid g = new Grid(args[0].toString());
+			Grid g = new Grid(args[0]);
 			if(!g.findSnakes()) {
 				System.out.println("FAIL!");
 			}

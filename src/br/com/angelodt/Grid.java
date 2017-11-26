@@ -12,43 +12,12 @@ import java.util.Scanner;
  * Represent the Grid of cells imported from CSV file. 
  */
 public class Grid {
-	private static Map<Integer, List<Snake>> snkList;
+	private Map<Integer, List<Snake>> snkList;
 	private boolean twoSnakesFound;
 	private final int TOP_LEFT = -1;
 	private final int BOTTON_RIGHT = +1;
 	private int[][]grid;
-	private boolean debug = false;
-	/*	 = {
-	{227,191,234,67,43,13,48,211,253,243},
-	{36,95,229,209,49,230,46,16,190,49},
-	{206,130,85,67,104,93,128,243,38,173},
-	{234,82,191,153,170,99,124,60,12,31},
-	{192,9,24,127,183,201,139,21,244,66},
-	{93,200,66,16,189,42,209,113,215,4},
-	{182,141,153,64,229,55,115,139,12,187},
-	{133,241,35,255,126,39,110,147,24,241},
-	{2,202,191,159,223,128,154,109,6,200},
-	{173,44,163,196,159,232,135,159,117,175}
-};
-
-
-/*		
-private int[][]grid = {{1,2,3,4},
-	               {5,6,7,8},
-	               {9,10,11,12},
-	               {13,14,15,16}
-	              };
-
-private int[][]grid = {{1,1,1,1},
-    {1,1,1,1},
-    {1,1,1,1},
-    {1,1,1,1}
-   };
-	 */
-
-	public Grid(int[][]grid) {
-		this.grid = grid;
-	}
+	private boolean debug;
 
 	/**
 	 * Create a grid from CSV file.
@@ -84,7 +53,7 @@ private int[][]grid = {{1,1,1,1},
 		}
 		twoSnakesFound = false;
 		snkList = new HashMap<>();
-		//debug = true;
+		debug = true;
 		System.out.print("FILE LOADED.\r\n");
 	}
 
@@ -111,17 +80,17 @@ private int[][]grid = {{1,1,1,1},
 	private Cell getRightCell(Cell cOrigin) {
 		return getCell(cOrigin.getLine(), cOrigin.getCol() + BOTTON_RIGHT);
 	}
-	
+
 	private void finish(Snake s, Snake found) {
 		twoSnakesFound = true;
 		System.out.println("TWO SNAKES FOUND!");
 		System.out.println(s.toString());
 		System.out.println(found.toString());
 	}
-	
+
 	private void addSnake(Snake s) {
 		if(debug) {
-			System.out.println("Snake found:"+s.toString());
+			System.out.println("Snake found:"+s.getSum());
 		}
 		List<Snake> found = snkList.get(s.getSum());
 		if(found==null) {
@@ -137,12 +106,16 @@ private int[][]grid = {{1,1,1,1},
 	}
 
 	public boolean findSnakes() {
+		Snake s = new Snake();
 		for (int i=0; i<grid.length; i++) {
 			for (int j=0; j<grid.length; j++) {
-				Snake s = new Snake();
 				Cell c = getCell(i,j);
 				if(s.addCell(c)) {
-					addSnake(findNext(s,c));
+					s = findNext(s,c);
+					if(s.isFull()) {
+						addSnake(s);
+						s = new Snake();
+					}
 					if(twoSnakesFound) {
 						break;
 					}
@@ -155,38 +128,30 @@ private int[][]grid = {{1,1,1,1},
 		return twoSnakesFound;
 	}
 
+	/**
+	 * Recursive function that find a next cell to add snake body.
+	 * A valid cell is that one dosen't exist in the snake body.
+	 * The order of search is right, botton, left, top.
+	 * The next cell is searched if the cell found is not ok. 
+	 */	
 	private Snake findNext(Snake s, Cell actual) {
-		if(debug) {
+		if(debug && actual != null) {
 			System.out.println(actual.toString());
 		}
-		if(s.isFull()) { return s; }
+		if(s.isFull() || actual == null) { 
+			return s; 
+		}
 		Cell next = getRightCell(actual);
-		if(next != null) {
-			if(s.addCell(next)) {
-				return findNext(s,next);
+		if( next == null || !s.addCell(next)) {
+			next = getBottonCell(actual);
+			if( next == null || !s.addCell(next)) {
+				next = getLeftCell(actual);
+				if( next == null || !s.addCell(next)) {
+					next = getTopCell(actual);
+					s.addCell(next);
+				}
 			}
 		}
-		if(s.isFull()) { return s; }
-		next = getBottonCell(actual);
-		if(next != null) {
-			if(s.addCell(next)) {
-				return findNext(s,next);
-			}
-		}
-		if(s.isFull()) { return s; }
-		next = getLeftCell(actual);
-		if(next != null) {
-			if(s.addCell(next)) {
-				return findNext(s,next);
-			}
-		}
-		if(s.isFull()) { return s; }
-		next = getTopCell(actual);
-		if(next != null) {
-			if(s.addCell(next)) {
-				return findNext(s,next);
-			}
-		}
-		return s;
+		return findNext(s,next);
 	}
 }

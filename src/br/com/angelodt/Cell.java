@@ -48,11 +48,7 @@ public class Cell {
         if (getClass() != obj.getClass())
             return false;
         Cell other = (Cell) obj;
-        if (line != other.line)
-            return false;
-        if (col != other.col)
-            return false;
-        if (value != other.value)
+        if (line != other.line || col != other.col || value != other.value)
             return false;
         return true;
     }
