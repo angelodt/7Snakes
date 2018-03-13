@@ -27,9 +27,17 @@ public class Snake {
 	public boolean isFull() {
 		return body.size()>6;
 	}
-
+	
 	public List<Cell> getBody() {
 		return body;
+	}
+	
+	public void setBody(List<Cell> body) {
+		this.body = body;
+	}
+
+	public Cell getLastCell() {
+		return body.get(body.size()-1);
 	}
 	
 	public int getSum() {

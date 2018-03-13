@@ -18,6 +18,7 @@ public class Grid {
 	private final int BOTTON_RIGHT = +1;
 	private int[][]grid;
 	private boolean debug;
+	private List<Snake> snkListTemp;
 
 	/**
 	 * Create a grid from CSV file.
@@ -53,6 +54,7 @@ public class Grid {
 		}
 		twoSnakesFound = false;
 		snkList = new HashMap<>();
+		snkListTemp = new ArrayList<>();
 		debug = true;
 		System.out.print("FILE LOADED.\r\n");
 	}
@@ -105,6 +107,33 @@ public class Grid {
 		snkList.put(s.getSum(),found);
 	}
 
+	/**
+	 * Recursive function that find a next cell to add snake body.
+	 * A valid cell is that one dosen't exist in the snake body.
+	 * The order of search is right, botton, left, top.
+	 * The next cell is searched if the cell found is not ok. 
+	 */	/*
+	private Snake findNext(Snake s, Cell current) {
+		if(debug && current != null) {
+			System.out.println(current.toString());
+		}
+		if(s.isFull() || current == null) { 
+			return s; 
+		}
+		Cell next = getRightCell(current);
+		if( next == null || !s.addCell(next)) {
+			next = getBottonCell(current);
+			if( next == null || !s.addCell(next)) {
+				next = getLeftCell(current);
+				if( next == null || !s.addCell(next)) {
+					next = getTopCell(current);
+					s.addCell(next);
+				}
+			}
+		}
+		return findNext(s,next);
+	}
+
 	public boolean findSnakes() {
 		Snake s = new Snake();
 		for (int i=0; i<grid.length; i++) {
@@ -126,32 +155,73 @@ public class Grid {
 			}
 		}
 		return twoSnakesFound;
-	}
+	}*/
 
-	/**
-	 * Recursive function that find a next cell to add snake body.
-	 * A valid cell is that one dosen't exist in the snake body.
-	 * The order of search is right, botton, left, top.
-	 * The next cell is searched if the cell found is not ok. 
-	 */	
-	private Snake findNext(Snake s, Cell actual) {
-		if(debug && actual != null) {
-			System.out.println(actual.toString());
-		}
-		if(s.isFull() || actual == null) { 
-			return s; 
-		}
-		Cell next = getRightCell(actual);
-		if( next == null || !s.addCell(next)) {
-			next = getBottonCell(actual);
-			if( next == null || !s.addCell(next)) {
-				next = getLeftCell(actual);
-				if( next == null || !s.addCell(next)) {
-					next = getTopCell(actual);
-					s.addCell(next);
+	public boolean findSnakes() {
+
+		for (int i=0; i<grid.length; i++) {
+			for (int j=0; j<grid.length; j++) {
+				Snake s = new Snake();
+				addSnake(createSnakes(s, getCell(i,j)));
+				if(twoSnakesFound) {
+					break;
 				}
 			}
+			if(twoSnakesFound) {
+				break;
+			}
 		}
-		return findNext(s,next);
+		return twoSnakesFound;
+	}
+	
+	private Snake createSnakes(Snake s, Cell current) {
+		if(debug && current != null) {
+			System.out.println(current.toString());
+		}
+		s.addCell(current);
+		if(s.isFull()) {
+			return s;
+		}			
+		List<Cell> cAdj = findAdjacentCell(current);
+		for (Cell cell : cAdj) {
+			Snake sNew = new Snake();
+			sNew.setBody(s.getBody());
+			if(sNew.addCell(cell)) {
+				sNew = createSnakes(sNew, cell);
+			}
+			if(sNew.isFull()) {
+				return sNew;
+			}
+		}
+		return s;
+	}
+
+	private List<Cell> findAdjacentCell(Cell current) {
+		List<Cell> cAdj = new ArrayList<>();
+
+		Cell next = getRightCell(current);
+		if( next != null) {
+			cAdj.add(next);
+		}
+		next = getBottonCell(current);
+		if( next != null) {
+			cAdj.add(next);
+		}
+		next = getLeftCell(current);
+		if( next != null) {
+			cAdj.add(next);
+		}
+		next = getTopCell(current);
+		if( next != null) {
+			cAdj.add(next);
+		}
+		return cAdj;
+	}
+	private void addSnake_2(Snake s) {
+		if(s.isFull()) {
+			addSnake(s);
+		} else {
+			snkListTemp.add(s);
+		}
 	}
 }
